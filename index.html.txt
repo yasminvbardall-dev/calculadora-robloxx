@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calculadora Roblox — Lucro & Taxa</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    /* Glow leve */
+    .glow {
+      box-shadow: 0 0 0 1px rgba(255,255,255,.06), 0 0 35px rgba(99,102,241,.18);
+    }
+  </style>
+
+</head>
+<link rel="manifest" href="manifest.json" />
+<meta name="theme-color" content="#4f46e5" />
+
+<body class="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white">
+  <div class="max-w-5xl mx-auto px-4 py-10">
+
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-8">
+      <div>
+        <h1 class="text-3xl md:text-4xl font-black tracking-tight">
+          ⚡ Calculadora de Lucro Roblox
+        </h1>
+        <p class="text-slate-300 mt-2">
+          Taxa padrão: <span class="text-white font-semibold">30%</span> (você recebe 70%).
+        </p>
+      </div>
+
+      <div class="flex gap-2">
+        <button id="exportBtn"
+          class="rounded-xl bg-white/10 hover:bg-white/15 active:bg-white/20 transition px-4 py-2 font-semibold border border-white/10">
+          Exportar histórico
+        </button>
+
+        <button id="clearHistoryBtn"
+          class="rounded-xl bg-rose-500/15 hover:bg-rose-500/25 active:bg-rose-500/30 transition px-4 py-2 font-semibold border border-rose-400/20 text-rose-200">
+          Limpar histórico
+        </button>
+      </div>
+    </div>
+
+    <!-- Layout -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+      <!-- Left: Calculator -->
+      <div class="lg:col-span-2 bg-white/5 border border-white/10 rounded-2xl p-6 md:p-7 glow">
+
+        <!-- Mode -->
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-6">
+          <div>
+            <h2 class="text-xl font-bold">📌 Cálculo</h2>
+            <p class="text-slate-400 text-sm">Escolha o modo e preencha os valores.</p>
+          </div>
+
+          <div class="flex gap-2 bg-black/20 border border-white/10 rounded-xl p-1">
+            <button id="modeSingle"
+              class="modeBtn rounded-lg px-4 py-2 font-semibold text-sm transition">
+              Venda Única
+            </button>
+            <button id="modeBulk"
+              class="modeBtn rounded-lg px-4 py-2 font-semibold text-sm transition">
+              Venda em Massa
+            </button>
+          </div>
+        </div>
+
+        <!-- Inputs -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div>
+            <label class="block text-sm font-medium text-slate-200 mb-2">
+              Preço do item (Robux)
+            </label>
+            <input id="price" type="number" min="0" step="1" placeholder="Ex: 100"
+              class="w-full rounded-xl bg-slate-900/60 border border-white/10 px-4 py-3 outline-none focus:ring-2 focus:ring-indigo-500" />
+          </div>
+
+          <div id="quantityWrap">
+            <label class="block text-sm font-medium text-slate-200 mb-2">
+              Quantidade vendida
+            </label>
+            <input id="quantity" type="number" min="1" step="1" placeholder="Ex: 10"
+              class="w-full rounded-xl bg-slate-900/60 border border-white/10 px-4 py-3 outline-none focus:ring-2 focus:ring-indigo-500" />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-slate-200 mb-2">
+              Custo por item (opcional)
+            </label>
+            <input id="cost" type="number" min="0" step="1" placeholder="Ex: 20"
+              class="w-full rounded-xl bg-slate-900/60 border border-white/10 px-4 py-3 outline-none focus:ring-2 focus:ring-indigo-500" />
+            <p class="text-xs text-slate-400 mt-2">
+              Se você gastou com anúncios, assets, UGC, etc.
+            </p>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-slate-200 mb-2">
+              Taxa da plataforma
+            </label>
+            <select id="fee"
+              class="w-full rounded-xl bg-slate-900/60 border border-white/10 px-4 py-3 outline-none focus:ring-2 focus:ring-indigo-500">
+              <option value="0.30" selected>30% (Padrão Roblox)</option>
+              <option value="0.25">25%</option>
+              <option value="0.20">20%</option>
+              <option value="0.10">10%</option>
+              <option value="0">0%</option>
+            </select>
+            <p class="text-xs text-slate-400 mt-2">
+              (Deixei ajustável caso você use outros modelos.)
+            </p>
+          </div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="flex flex-col md:flex-row gap-3 mt-6">
+          <button id="calcBtn"
+            class="rounded-xl bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 transition px-5 py-3 font-semibold shadow-lg shadow-indigo-600/20">
+            Calcular
+          </button>
+
+          <button id="saveBtn"
+            class="rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 active:bg-emerald-500/30 transition px-5 py-3 font-semibold border border-emerald-400/20 text-emerald-200">
+            Salvar no histórico
+          </button>
+
+          <button id="resetBtn"
+            class="rounded-xl bg-white/10 hover:bg-white/15 active:bg-white/20 transition px-5 py-3 font-semibold border border-white/10">
+            Limpar
+          </button>
+        </div>
+
+        <!-- Results -->
+        <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="rounded-2xl border border-white/10 bg-slate-900/40 p-5">
+            <p class="text-slate-300 text-sm">Total bruto</p>
+            <p id="gross" class="text-2xl font-bold mt-1">—</p>
+          </div>
+
+          <div class="rounded-2xl border border-white/10 bg-slate-900/40 p-5">
+            <p class="text-slate-300 text-sm">Taxa</p>
+            <p id="feeAmount" class="text-2xl font-bold mt-1">—</p>
+          </div>
+
+          <div class="rounded-2xl border border-white/10 bg-slate-900/40 p-5">
+            <p class="text-slate-300 text-sm">Você recebe (líquido)</p>
+            <p id="net" class="text-2xl font-bold mt-1 text-emerald-400">—</p>
+          </div>
+
+          <div class="rounded-2xl border border-white/10 bg-slate-900/40 p-5">
+            <p class="text-slate-300 text-sm">Lucro final (com custo)</p>
+            <p id="profit" class="text-2xl font-bold mt-1 text-yellow-300">—</p>
+          </div>
+        </div>
+
+        <!-- Graph -->
+        <div class="mt-8">
+          <div class="flex items-center justify-between gap-4 mb-3">
+            <div>
+              <h3 class="font-bold text-lg">📈 Lucro por quantidade</h3>
+              <p class="text-slate-400 text-sm">
+                Visualize quanto o lucro cresce conforme as vendas aumentam.
+              </p>
+            </div>
+
+            <div class="w-44">
+              <label class="text-xs text-slate-400">Máx. quantidade no gráfico</label>
+              <input id="graphMaxQ" type="number" min="5" step="1" value="50"
+                class="w-full mt-1 rounded-xl bg-slate-900/60 border border-white/10 px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-500" />
+            </div>
+          </div>
+
+          <div class="rounded-2xl border border-white/10 bg-black/20 p-3">
+            <canvas id="profitChart" class="w-full h-56"></canvas>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right: History -->
+      <div class="bg-white/5 border border-white/10 rounded-2xl p-6 glow">
+        <h2 class="text-xl font-bold mb-1">🧾 Histórico</h2>
+        <p class="text-slate-400 text-sm mb-5">
+          Seus cálculos ficam salvos no navegador.
+        </p>
+
+        <div id="historyList" class="space-y-3">
+          <!-- itens do histórico -->
+        </div>
+
+        <div id="historyEmpty" class="text-slate-500 text-sm mt-6 hidden">
+          Nenhum cálculo salvo ainda.
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // ---------------------------
+    // Helpers
+    // ---------------------------
+    const $ = (id) => document.getElementById(id);
+
+    function clamp(n, min, max) {
+      return Math.min(max, Math.max(min, n));
+    }
+
+    function formatRobux(n) {
+      if (!Number.isFinite(n)) return "—";
+      return Math.round(n).toLocaleString("pt-BR") + " R$";
+    }
+
+    function nowISO() {
+      return new Date().toISOString();
+    }
+
+    function niceDate(iso) {
+      try {
+        const d = new Date(iso);
+        return d.toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
+      } catch {
+        return "—";
+      }
+    }
+
+    // ---------------------------
+    // State
+    // ---------------------------
+    let mode = "bulk"; // "single" | "bulk"
+
+    const priceEl = $("price");
+    const quantityEl = $("quantity");
+    const costEl = $("cost");
+    const feeEl = $("fee");
+
+    const grossEl = $("gross");
+    const feeAmountEl = $("feeAmount");
+    const netEl = $("net");
+    const profitEl = $("profit");
+
+    const calcBtn = $("calcBtn");
+    const resetBtn = $("resetBtn");
+    const saveBtn = $("saveBtn");
+
+    const historyListEl = $("historyList");
+    const historyEmptyEl = $("historyEmpty");
+
+    const modeSingleBtn = $("modeSingle");
+    const modeBulkBtn = $("modeBulk");
+
+    const exportBtn = $("exportBtn");
+    const clearHistoryBtn = $("clearHistoryBtn");
+
+    const graphMaxQEl = $("graphMaxQ");
+    const canvas = $("profitChart");
+    const ctx = canvas.getContext("2d");
+
+    const STORAGE_KEY = "roblox_profit_calc_history_v1";
+
+    // ---------------------------
+    // Core calc
+    // ---------------------------
+    function getInputs() {
+      const price = Number(priceEl.value);
+      const quantity = mode === "single" ? 1 : Number(quantityEl.value);
+      const cost = Number(costEl.value || 0);
+      const fee = Number(feeEl.value);
+
+      return { price, quantity, cost, fee };
+    }
+
+    function validateInputs({ price, quantity, cost, fee }) {
+      if (!Number.isFinite(price) || price < 0) return "Digite um preço válido.";
+      if (!Number.isFinite(quantity) || quantity <= 0) return "Digite uma quantidade válida.";
+      if (!Number.isFinite(cost) || cost < 0) return "Digite um custo válido (ou deixe vazio).";
+      if (!Number.isFinite(fee) || fee < 0 || fee > 1) return "Taxa inválida.";
+      return null;
+    }
+
+    function compute({ price, quantity, cost, fee }) {
+      const gross = price * quantity;
+      const feeAmount = gross * fee;
+      const net = gross - feeAmount;
+      const totalCost = cost * quantity;
+      const profit = net - totalCost;
+
+      return { gross, feeAmount, net, totalCost, profit };
+    }
+
+    function updateProfitColor(profit) {
+      profitEl.classList.remove("text-emerald-400", "text-red-400", "text-yellow-300");
+      if (profit > 0) profitEl.classList.add("text-emerald-400");
+      else if (profit < 0) profitEl.classList.add("text-red-400");
+      else profitEl.classList.add("text-yellow-300");
+    }
+
+    function calculateAndRender() {
+      const inputs = getInputs();
+      const err = validateInputs(inputs);
+
+      if (err) {
+        alert(err);
+        return null;
+      }
+
+      const result = compute(inputs);
+
+      grossEl.textContent = formatRobux(result.gross);
+      feeAmountEl.textContent = formatRobux(result.feeAmount);
+      netEl.textContent = formatRobux(result.net);
+      profitEl.textContent = formatRobux(result.profit);
+
+      updateProfitColor(result.profit);
+
+      drawChart();
+      return { inputs, result };
+    }
+
+    // ---------------------------
+    // Chart (Canvas)
+    // ---------------------------
+    function resizeCanvasToDisplaySize(canvas) {
+      const rect = canvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+
+      const width = Math.floor(rect.width * dpr);
+      const height = Math.floor(rect.height * dpr);
+
+      if (canvas.width !== width || canvas.height !== height) {
+        canvas.width = width;
+        canvas.height = height;
+      }
+      return { width, height, dpr };
+    }
+
+    function drawChart() {
+      const inputs = getInputs();
+      const err = validateInputs(inputs);
+      if (err) return;
+
+      const maxQ = clamp(Number(graphMaxQEl.value || 50), 5, 500);
+
+      const { width, height } = resizeCanvasToDisplaySize(canvas);
+
+      // background
+      ctx.clearRect(0, 0, width, height);
+      ctx.fillStyle = "rgba(0,0,0,0.25)";
+      ctx.fillRect(0, 0, width, height);
+
+      // compute series
+      const points = [];
+      for (let q = 1; q <= maxQ; q++) {
+        const r = compute({ ...inputs, quantity: q });
+        points.push({ q, profit: r.profit });
+      }
+
+      const profits = points.map(p => p.profit);
+      const minP = Math.min(...profits);
+      const maxP = Math.max(...profits);
+
+      // padding
+      const pad = Math.floor(width * 0.06);
+      const left = pad;
+      const right = width - pad;
+      const top = pad;
+      const bottom = height - pad;
+
+      // avoid division by zero
+      const pRange = (maxP - minP) || 1;
+
+      // grid lines
+      ctx.strokeStyle = "rgba(255,255,255,0.08)";
+      ctx.lineWidth = 1;
+
+      const gridLines = 5;
+      for (let i = 0; i <= gridLines; i++) {
+        const y = top + ((bottom - top) * i) / gridLines;
+        ctx.beginPath();
+        ctx.moveTo(left, y);
+        ctx.lineTo(right, y);
+        ctx.stroke();
+      }
+
+      // axis labels (simple)
+      ctx.fillStyle = "rgba(255,255,255,0.55)";
+      ctx.font = `${Math.floor(width * 0.018)}px system-ui`;
+
+      ctx.fillText(`Qtd: 1 → ${maxQ}`, left, top - 10);
+      ctx.fillText(`Lucro: ${Math.round(minP)} → ${Math.round(maxP)} R$`, left, bottom + 18);
+
+      // line
+      ctx.strokeStyle = "rgba(99,102,241,0.95)";
+      ctx.lineWidth = Math.max(2, Math.floor(width * 0.004));
+      ctx.beginPath();
+
+      points.forEach((p, i) => {
+        const x = left + ((right - left) * (p.q - 1)) / (maxQ - 1);
+        const y = bottom - ((bottom - top) * (p.profit - minP)) / pRange;
+
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+
+      ctx.stroke();
+
+      // zero line (if visible)
+      if (minP < 0 && maxP > 0) {
+        const zeroY = bottom - ((bottom - top) * (0 - minP)) / pRange;
+        ctx.strokeStyle = "rgba(255,255,255,0.22)";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(left, zeroY);
+        ctx.lineTo(right, zeroY);
+        ctx.stroke();
+
+        ctx.fillStyle = "rgba(255,255,255,0.55)";
+        ctx.fillText("0", left + 4, zeroY - 6);
+      }
+    }
+
+    // ---------------------------
+    // History (LocalStorage)
+    // ---------------------------
+    function loadHistory() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return [];
+        const parsed = JSON.parse(raw);
+        if (!Array.isArray(parsed)) return [];
+        return parsed;
+      } catch {
+        return [];
+      }
+    }
+
+    function saveHistory(items) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    }
+
+    function addToHistory(entry) {
+      const items = loadHistory();
+      items.unshift(entry);
+
+      // limitar histórico
+      const limited = items.slice(0, 25);
+      saveHistory(limited);
+      renderHistory();
+    }
+
+    function deleteHistoryItem(id) {
+      const items = loadHistory().filter(x => x.id !== id);
+      saveHistory(items);
+      renderHistory();
+    }
+
+    function clearHistory() {
+      localStorage.removeItem(STORAGE_KEY);
+      renderHistory();
+    }
+
+    function renderHistory() {
+      const items = loadHistory();
+      historyListEl.innerHTML = "";
+
+      if (!items.length) {
+        historyEmptyEl.classList.remove("hidden");
+        return;
+      }
+
+      historyEmptyEl.classList.add("hidden");
+
+      items.forEach((item) => {
+        const div = document.createElement("div");
+        div.className = "rounded-2xl border border-white/10 bg-slate-900/40 p-4";
+
+        div.innerHTML = `
+          <div class="flex items-start justify-between gap-3">
+            <div>
+              <p class="text-sm text-slate-400">${niceDate(item.date)}</p>
+              <p class="font-bold mt-1">
+                Lucro: <span class="text-white">${formatRobux(item.result.profit)}</span>
+              </p>
+              <p class="text-sm text-slate-300 mt-1">
+                Preço: ${item.inputs.price} • Qtd: ${item.inputs.quantity} • Taxa: ${Math.round(item.inputs.fee * 100)}%
+              </p>
+            </div>
+
+            <button data-id="${item.id}"
+              class="deleteBtn shrink-0 rounded-xl px-3 py-2 text-sm font-semibold
+                     bg-rose-500/15 hover:bg-rose-500/25 active:bg-rose-500/30
+                     border border-rose-400/20 text-rose-200 transition">
+              Apagar
+            </button>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2 mt-3 text-sm">
+            <div class="rounded-xl bg-black/20 border border-white/10 p-3">
+              <p class="text-slate-400 text-xs">Bruto</p>
+              <p class="font-semibold">${formatRobux(item.result.gross)}</p>
+            </div>
+            <div class="rounded-xl bg-black/20 border border-white/10 p-3">
+              <p class="text-slate-400 text-xs">Líquido</p>
+              <p class="font-semibold">${formatRobux(item.result.net)}</p>
+            </div>
+          </div>
+        `;
+
+        historyListEl.appendChild(div);
+      });
+
+      // bind delete buttons
+      document.querySelectorAll(".deleteBtn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const id = btn.getAttribute("data-id");
+          deleteHistoryItem(id);
+        });
+      });
+    }
+
+    function exportHistory() {
+      const items = loadHistory();
+      if (!items.length) {
+        alert("O histórico está vazio.");
+        return;
+      }
+
+      const blob = new Blob([JSON.stringify(items, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "historico_calculadora_roblox.json";
+      a.click();
+
+      URL.revokeObjectURL(url);
+    }
+
+    // ---------------------------
+    // Mode switching
+    // ---------------------------
+    function setMode(newMode) {
+      mode = newMode;
+
+      // styles
+      const active = "bg-indigo-600 text-white shadow shadow-indigo-600/20";
+      const inactive = "text-slate-300 hover:text-white hover:bg-white/5";
+
+      [modeSingleBtn, modeBulkBtn].forEach(b => {
+        b.className = "modeBtn rounded-lg px-4 py-2 font-semibold text-sm transition";
+      });
+
+      if (mode === "single") {
+        modeSingleBtn.classList.add(...active.split(" "));
+        modeBulkBtn.classList.add(...inactive.split(" "));
+        $("quantityWrap").classList.add("opacity-50");
+        quantityEl.value = "";
+        quantityEl.disabled = true;
+      } else {
+        modeBulkBtn.classList.add(...active.split(" "));
+        modeSingleBtn.classList.add(...inactive.split(" "));
+        $("quantityWrap").classList.remove("opacity-50");
+        quantityEl.disabled = false;
+      }
+
+      // recalcula se possível
+      drawChart();
+    }
+
+    // ---------------------------
+    // Reset
+    // ---------------------------
+    function resetAll() {
+      priceEl.value = "";
+      quantityEl.value = "";
+      costEl.value = "";
+      feeEl.value = "0.30";
+      graphMaxQEl.value = "50";
+
+      grossEl.textContent = "—";
+      feeAmountEl.textContent = "—";
+      netEl.textContent = "—";
+      profitEl.textContent = "—";
+
+      profitEl.classList.remove("text-emerald-400", "text-red-400");
+      profitEl.classList.add("text-yellow-300");
+
+      drawChart();
+    }
+
+    // ---------------------------
+    // Events
+    // ---------------------------
+    calcBtn.addEventListener("click", calculateAndRender);
+
+    resetBtn.addEventListener("click", () => {
+      resetAll();
+    });
+
+    saveBtn.addEventListener("click", () => {
+      const data = calculateAndRender();
+      if (!data) return;
+
+      const entry = {
+        id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
+        date: nowISO(),
+        mode,
+        inputs: data.inputs,
+        result: data.result
+      };
+
+      addToHistory(entry);
+    });
+
+    exportBtn.addEventListener("click", exportHistory);
+
+    clearHistoryBtn.addEventListener("click", () => {
+      if (confirm("Tem certeza que deseja apagar TODO o histórico?")) {
+        clearHistory();
+      }
+    });
+
+    modeSingleBtn.addEventListener("click", () => setMode("single"));
+    modeBulkBtn.addEventListener("click", () => setMode("bulk"));
+
+    // recalcular gráfico em tempo real
+    [priceEl, quantityEl, costEl, feeEl, graphMaxQEl].forEach((el) => {
+      el.addEventListener("input", () => drawChart());
+    });
+
+    // Enter para calcular
+    [priceEl, quantityEl, costEl].forEach((el) => {
+      el.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") calculateAndRender();
+      });
+    });
+
+    window.addEventListener("resize", drawChart);
+
+    // ---------------------------
+    // Init
+    // ---------------------------
+    setMode("bulk");
+    renderHistory();
+    drawChart();
+  </script>
+<script>
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("./service-worker.js");
+  }
+</script>
+
+</body>
+</html>
